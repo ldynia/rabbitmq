@@ -4,21 +4,21 @@ services:
     image: rabbitmq:3
     container_name: rabbit-broker
     hostname: rabbit-broker
-  producer:
+  exchange:
     image: python:3.8.1
-    container_name: rabbit-producer
-    hostname: rabbit-producer
+    container_name: rabbit-exchange
+    hostname: rabbit-exchange
     depends_on:
       - broker
     volumes:
-      - ./producer:/src
+      - ./exchange:/src
     command: ./src/startup.sh
   consumer_one:
     image: python:3.8.1
     container_name: rabbit-consumer-one
     hostname: rabbit-consumer-one
     depends_on:
-      - producer
+      - exchange
     volumes:
       - ./consumer_one:/src
     command: ./src/startup.sh
@@ -27,7 +27,7 @@ services:
     container_name: rabbit-consumer-two
     hostname: rabbit-consumer-two
     depends_on:
-      - producer
+      - exchange
     volumes:
       - ./consumer_two:/src
     command: ./src/startup.sh
