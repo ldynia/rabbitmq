@@ -1,0 +1,27 @@
+version: '3'
+services:
+  producer:
+    image: python:3.8.1
+    container_name: rabbit-producer
+    hostname: rabbit-producer
+    volumes:
+      - ./producer:/src
+    command: ./src/startup.sh
+  broker:
+    image: rabbitmq:3
+    container_name: rabbit-broker
+    hostname: rabbit-broker
+  consumer_one:
+    image: python:3.8.1
+    container_name: rabbit-consumer-one
+    hostname: rabbit-consumer-one
+    volumes:
+      - ./consumer_one:/src
+    command: ./src/startup.sh
+  consumer_two:
+    image: python:3.8.1
+    container_name: rabbit-consumer-two
+    hostname: rabbit-consumer-two
+    volumes:
+      - ./consumer_two:/src
+    command: ./src/startup.sh
