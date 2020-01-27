@@ -2,11 +2,9 @@
 
 import pika
 
-connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='rabbit-broker'))
+connection = pika.BlockingConnection(pika.ConnectionParameters(host='rabbit-broker'))
 
 channel = connection.channel()
-
 channel.queue_declare(queue='rpc_queue')
 
 
@@ -20,8 +18,8 @@ def fib(n):
 
 def on_request(ch, method, props, body):
     n = int(body)
-
     print(" [.] fib(%s)" % n)
+
     result = fib(n)
 
     ch.basic_publish(exchange='',
