@@ -31,3 +31,12 @@ services:
     volumes:
       - ./consumer_two:/src
     command: ./src/startup.sh
+  consumer_three:
+    image: python:3.8.1
+    container_name: rabbit-consumer-three
+    hostname: rabbit-consumer-three
+    depends_on:
+      - exchange
+    volumes:
+      - ./consumer_three:/src
+    command: ./src/startup.sh
