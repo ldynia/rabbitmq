@@ -1,7 +1,9 @@
 version: '3'
 services:
   broker:
-    image: rabbitmq:3
+    image: rabbitmq:3.8.2-management
+    ports:
+      - 15672:15672
     container_name: rabbit-broker
     hostname: rabbit-broker
   exchange:
