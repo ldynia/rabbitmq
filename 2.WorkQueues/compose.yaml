@@ -1,0 +1,38 @@
+version: "3.8"
+services:
+  broker:
+    image: rabbitmq:3.12.4-management-alpine
+    container_name: rabbitmq-broker
+    hostname: rabbitmq-broker
+    ports:
+      - 15672:15672
+
+  producer:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-producer
+    hostname: rabbitmq-producer
+    command: ./usr/src/scripts/startup.sh
+    depends_on:
+      - broker
+    volumes:
+      - ./producer:/usr/src
+
+  consumer_a:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-consumer-a
+    hostname: rabbitmq-consumer-a
+    command: ./usr/src/scripts/startup.sh
+    depends_on:
+      - producer
+    volumes:
+      - ./consumer:/usr/src
+
+  consumer_b:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-consumer-b
+    hostname: rabbitmq-consumer-b
+    command: ./usr/src/scripts/startup.sh
+    depends_on:
+      - producer
+    volumes:
+      - ./consumer:/usr/src
