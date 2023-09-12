@@ -1,20 +1,34 @@
 #!/usr/bin/env python3
 
-import sys
-import pika
+import logging
+import random
+import os
+from ssl import create_default_context
+
+from pika import BlockingConnection
+from pika import ConnectionParameters
+from pika import SSLOptions
+from pika.credentials import PlainCredentials
 
 
-BROKER = "rabbitmq-broker"
-EXCHANGE = "logs"
-EXCHANGE_TYPE = "fanout"
-message = ' '.join(sys.argv[1:]) or "Hello World!"
+# logging.basicConfig(level=logging.INFO)
 
-connection = pika.BlockingConnection(pika.ConnectionParameters(BROKER))
+broker = os.environ.get("RABBITMQ_BROKER")
+exchange = os.environ.get("RABBITMQ_EXCHANGE")
+exchange_type = os.environ.get("RABBITMQ_EXCHANGE_TYPE")
+message = f"Black friday discount! {random.randint(1, 9)*10}% off on all products!"
+password = os.environ.get("RABBITMQ_PASS")
+queue = ""
+user = os.environ.get("RABBITMQ_USER")
 
-channel = connection.channel()
-channel.exchange_declare(exchange=EXCHANGE, exchange_type=EXCHANGE_TYPE)
-channel.basic_publish(exchange=EXCHANGE, routing_key="", body=message)
+context = create_default_context(cafile="/etc/ssl/private/ca_certificate.pem")
+context.load_cert_chain("/etc/ssl/private/client_certificate.pem", "/etc/ssl/private/client_key.pem")
+ssl_options = SSLOptions(context)
 
-print(f"[x] Sent '{message}' message")
-
-connection.close()
+credentials = PlainCredentials(user, password)
+params = ConnectionParameters(broker, 5671, ssl_options=ssl_options, credentials=credentials)
+with BlockingConnection(params) as connection:
+    print(f"[x] Sent '{message}' message to '{exchange}' exchange.")
+    channel = connection.channel()
+    channel.exchange_declare(exchange=exchange, exchange_type=exchange_type)
+    channel.basic_publish(exchange=exchange, routing_key=queue, body=message)

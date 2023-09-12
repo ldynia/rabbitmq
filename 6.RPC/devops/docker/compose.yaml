@@ -1,0 +1,67 @@
+version: "3.8"
+services:
+  certs:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-init
+    entrypoint: ["/bin/sh", "/usr/src/certs.sh"]
+    working_dir: /usr/src
+    volumes:
+      - ../../broker/scripts/certs.sh:/usr/src/certs.sh
+      - certificates:/etc/ssl/private:rw
+
+  broker:
+    image: rabbitmq:3.12.4-management-alpine
+    container_name: rabbitmq-broker
+    hostname: rabbitmq-broker
+    restart: always
+    environment:
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    ports:
+      - 15672:15672
+    volumes:
+      - ../../broker/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
+      - certificates:/etc/ssl/private:ro
+
+  server:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-server
+    hostname: rabbitmq-server
+    command: ./usr/src/scripts/startup.sh
+    environment:
+      - RABBITMQ_BROKER=rabbitmq-broker
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_QUEUE=compute
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    volumes:
+      - ../../server:/usr/src
+      - certificates:/etc/ssl/private:ro
+
+  client:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-client
+    hostname: rabbitmq-client
+    command: ./usr/src/scripts/startup.sh
+    environment:
+      - RABBITMQ_BROKER=rabbitmq-broker
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_QUEUE=compute
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    volumes:
+      - ../../client:/usr/src
+      - certificates:/etc/ssl/private:ro
+
+volumes:
+  certificates:
+    name: rabbitmq-certs
+
+networks:
+  rabbitmq:
+    name: rabbitmq
+    driver: bridge

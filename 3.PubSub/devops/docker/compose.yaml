@@ -1,0 +1,86 @@
+version: "3.8"
+services:
+  certs:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-init
+    entrypoint: ["/bin/sh", "/usr/src/certs.sh"]
+    working_dir: /usr/src
+    volumes:
+      - ../../broker/scripts/certs.sh:/usr/src/certs.sh
+      - certificates:/etc/ssl/private:rw
+
+  broker:
+    image: rabbitmq:3.12.4-management-alpine
+    container_name: rabbitmq-broker
+    hostname: rabbitmq-broker
+    restart: always
+    environment:
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    ports:
+      - 15672:15672
+    volumes:
+      - ../../broker/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
+      - certificates:/etc/ssl/private:ro
+
+  exchange:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-exchange
+    hostname: rabbitmq-exchange
+    command: ./usr/src/scripts/startup.sh
+    environment:
+      - RABBITMQ_BROKER=rabbitmq-broker
+      - RABBITMQ_EXCHANGE_TYPE=fanout
+      - RABBITMQ_EXCHANGE=discount
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    volumes:
+      - ../../exchange:/usr/src
+      - certificates:/etc/ssl/private:ro
+
+  consumer_a:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-consumer-a
+    hostname: rabbitmq-consumer-a
+    command: ./usr/src/scripts/startup.sh
+    environment:
+      - RABBITMQ_BROKER=rabbitmq-broker
+      - RABBITMQ_EXCHANGE_TYPE=fanout
+      - RABBITMQ_EXCHANGE=discount
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    volumes:
+      - ../../consumer:/usr/src
+      - certificates:/etc/ssl/private:ro
+
+  consumer_b:
+    image: python:3.11.5-alpine
+    container_name: rabbitmq-consumer-b
+    hostname: rabbitmq-consumer-b
+    command: ./usr/src/scripts/startup.sh
+    environment:
+      - RABBITMQ_BROKER=rabbitmq-broker
+      - RABBITMQ_EXCHANGE_TYPE=fanout
+      - RABBITMQ_EXCHANGE=discount
+      - RABBITMQ_PASS=bunny
+      - RABBITMQ_USER=bugs
+    networks:
+      - rabbitmq
+    volumes:
+      - ../../consumer:/usr/src
+      - certificates:/etc/ssl/private:ro
+
+volumes:
+  certificates:
+    name: rabbitmq-certs
+
+networks:
+  rabbitmq:
+    name: rabbitmq
+    driver: bridge
