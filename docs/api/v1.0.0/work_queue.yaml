@@ -1,0 +1,68 @@
+﻿asyncapi: 2.6.0
+info:
+  title: Work Queue
+  version: '1.0.0'
+  description: |
+    Implementation of work queue inspired by this [tutorial](https://www.rabbitmq.com/tutorials/tutorial-two-python.html).
+
+defaultContentType: application/json
+
+servers:
+  development:
+    url: rabbitmq-broker:5671
+    protocol: amqp
+    description: RabbitMQ broker development server.
+    security:
+      - user-password: []
+      - certificates: []
+
+channels:
+  dice:
+    description: Named queue
+    subscribe:
+      bindings:
+        amqp:
+          is: queue
+          queue:
+            ack: false
+            durable: true
+            name: dice
+            vhost: /
+      message:
+        bindings:
+          amqp:
+            contentEncoding: utf-8
+        $ref: '#/components/messages/DiceRoll'
+    publish:
+      bindings:
+        amqp:
+          is: queue
+          queue:
+            durable: true
+            name: dice
+            vhost: /
+      message:
+        bindings:
+          amqp:
+            contentEncoding: utf-8
+        $ref: '#/components/messages/DiceRoll'
+
+components:
+  messages:
+    DiceRoll:
+      name: diceROll
+      title: Dice Roll
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          count:
+            type: string
+          message:
+            type: string
+
+  securitySchemes:
+    user-password:
+      type: userPassword
+    certificates:
+      type: X509

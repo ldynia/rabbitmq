@@ -1,6 +1,6 @@
 # Instructions
 
-1. Open five terminal windows.
+1. You need three terminals. I'm using [tmux](https://github.com/tmux/tmux/wiki) to split the terminal into separate windows.
 1. In **first** window run `docker compose -f devops/docker/compose.yaml up -d`
 1. In **second** window run `docker exec -it rabbitmq-consumer-a python3 /usr/src/consumer.py`
 1. In **third** window run `docker exec -it rabbitmq-consumer-b python3 /usr/src/consumer.py`
@@ -11,10 +11,13 @@ To access RabbitMQ management console go to [localhost:15672](http://localhost:1
 - Username: `bugs`
 - Password: `bunny`
 
+# Terminal
+
+![work queue](../docs/assets/images/2.work-queue.png)
+
 # Debug
 
 ```shell
-docker exec rabbitmq-broker rabbitmqctl list_queues
-docker exec rabbitmq-broker rabbitmqctl list_bindings
+pikadocker exec rabbitmq-broker rabbitmqctl list_bindings
 docker exec rabbitmq-broker rabbitmqctl list_exchanges
 ```

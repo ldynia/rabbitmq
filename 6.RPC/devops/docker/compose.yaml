@@ -6,7 +6,7 @@ services:
     entrypoint: ["/bin/sh", "/usr/src/certs.sh"]
     working_dir: /usr/src
     volumes:
-      - ../../broker/scripts/certs.sh:/usr/src/certs.sh
+      - ../../src/scripts/certs.sh:/usr/src/certs.sh
       - certificates:/etc/ssl/private:rw
 
   broker:
@@ -22,7 +22,7 @@ services:
     ports:
       - 15672:15672
     volumes:
-      - ../../broker/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
+      - ../../src/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
       - certificates:/etc/ssl/private:ro
 
   server:
@@ -33,12 +33,12 @@ services:
     environment:
       - RABBITMQ_BROKER=rabbitmq-broker
       - RABBITMQ_PASS=bunny
-      - RABBITMQ_QUEUE=compute
+      - RABBITMQ_QUEUE=fibonacci
       - RABBITMQ_USER=bugs
     networks:
       - rabbitmq
     volumes:
-      - ../../server:/usr/src
+      - ../../src:/usr/src
       - certificates:/etc/ssl/private:ro
 
   client:
@@ -49,12 +49,12 @@ services:
     environment:
       - RABBITMQ_BROKER=rabbitmq-broker
       - RABBITMQ_PASS=bunny
-      - RABBITMQ_QUEUE=compute
+      - RABBITMQ_QUEUE=fibonacci
       - RABBITMQ_USER=bugs
     networks:
       - rabbitmq
     volumes:
-      - ../../client:/usr/src
+      - ../../src:/usr/src
       - certificates:/etc/ssl/private:ro
 
 volumes:

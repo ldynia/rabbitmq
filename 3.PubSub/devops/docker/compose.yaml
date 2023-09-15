@@ -6,7 +6,7 @@ services:
     entrypoint: ["/bin/sh", "/usr/src/certs.sh"]
     working_dir: /usr/src
     volumes:
-      - ../../broker/scripts/certs.sh:/usr/src/certs.sh
+      - ../../src/scripts/certs.sh:/usr/src/certs.sh
       - certificates:/etc/ssl/private:rw
 
   broker:
@@ -22,7 +22,7 @@ services:
     ports:
       - 15672:15672
     volumes:
-      - ../../broker/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
+      - ../../src/config/etc/rabbitmq/conf.d/10-defaults.conf:/etc/rabbitmq/conf.d/10-defaults.conf
       - certificates:/etc/ssl/private:ro
 
   exchange:
@@ -39,7 +39,7 @@ services:
     networks:
       - rabbitmq
     volumes:
-      - ../../exchange:/usr/src
+      - ../../src:/usr/src
       - certificates:/etc/ssl/private:ro
 
   consumer_a:
@@ -56,7 +56,7 @@ services:
     networks:
       - rabbitmq
     volumes:
-      - ../../consumer:/usr/src
+      - ../../src:/usr/src
       - certificates:/etc/ssl/private:ro
 
   consumer_b:
@@ -73,7 +73,7 @@ services:
     networks:
       - rabbitmq
     volumes:
-      - ../../consumer:/usr/src
+      - ../../src:/usr/src
       - certificates:/etc/ssl/private:ro
 
 volumes:
